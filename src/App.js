@@ -3,7 +3,6 @@ import { Button, Container, Grid } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
 
 function ScreenRecorder() {
-  // State variables to manage the screen stream, media recorder, recorded chunks, and recording state
   const [screenStream, setScreenStream] = useState(null);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [recordedChunks, setRecordedChunks] = useState([]);
@@ -12,12 +11,15 @@ function ScreenRecorder() {
   // Function to start capturing screen and audio
   const startCapture = async () => {
     try {
+      // Request audio stream
       const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Request screen video stream
       const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      // Combine audio and screen streams into a single stream
       const combinedStream = new MediaStream([...screenStream.getTracks(), ...audioStream.getTracks()]);
+      // Set the combined stream for recording
       setScreenStream(combinedStream);
-
-      // Clear recordedChunks and mediaRecorder when starting a new capture
+      // Clear recordedChunks, mediaRecorder, and recording state for new capture
       setRecordedChunks([]);
       setMediaRecorder(null);
       setRecording(false);
@@ -32,17 +34,19 @@ function ScreenRecorder() {
       const recorder = new MediaRecorder(screenStream);
       const chunks = [];
 
+      // Event listener to collect recorded chunks
       recorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
           chunks.push(e.data);
         }
       };
 
+      // Event listener when recording stops
       recorder.onstop = () => {
-        const recordedBlob = new Blob(chunks, { type: 'video/webm' });
         setRecordedChunks(chunks);
       };
 
+      // Start the recorder
       recorder.start();
       setMediaRecorder(recorder);
       setRecording(true);
@@ -57,6 +61,7 @@ function ScreenRecorder() {
       mediaRecorder.stop();
       setRecording(false);
       if (screenStream) {
+        // Stop all tracks in the screenStream
         screenStream.getTracks().forEach(track => track.stop());
         setScreenStream(null);
       }
@@ -78,6 +83,7 @@ function ScreenRecorder() {
     a.download = 'recorded-video.mp4';
     document.body.appendChild(a);
     a.click();
+    a.remove(); // Remove the temporary link element
     URL.revokeObjectURL(downloadUrl);
   };
 
@@ -117,7 +123,11 @@ function ScreenRecorder() {
           </Grid>
         )}
       </Grid>
-      {/* Conditional rendering of the video preview based on recordedChunks */}
+      {/* Display screenStream preview */}
+      {screenStream && (
+        <video srcObject={screenStream} controls style={{ marginTop: '20px', width: '100%' }} />
+      )}
+      {/* Display recorded video */}
       {recordedChunks.length > 0 && (
         <video controls style={{ marginTop: '20px', width: '100%' }}>
           {recordedChunks.map((chunk, index) => (
