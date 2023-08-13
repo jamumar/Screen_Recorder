@@ -16,6 +16,11 @@ function ScreenRecorder() {
       const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
       const combinedStream = new MediaStream([...screenStream.getTracks(), ...audioStream.getTracks()]);
       setScreenStream(combinedStream);
+
+      // Clear recordedChunks and mediaRecorder when starting a new capture
+      setRecordedChunks([]);
+      setMediaRecorder(null);
+      setRecording(false);
     } catch (error) {
       console.error('Error capturing screen:', error);
     }
