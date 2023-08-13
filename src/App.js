@@ -3,11 +3,13 @@ import { Button, Container, Grid } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
 
 function ScreenRecorder() {
+  // State variables to manage the screen stream, media recorder, recorded chunks, and recording state
   const [screenStream, setScreenStream] = useState(null);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [recordedChunks, setRecordedChunks] = useState([]);
   const [recording, setRecording] = useState(false);
 
+  // Function to start capturing screen and audio
   const startCapture = async () => {
     try {
       const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -19,6 +21,7 @@ function ScreenRecorder() {
     }
   };
 
+  // Function to start recording
   const startRecording = () => {
     try {
       const recorder = new MediaRecorder(screenStream);
@@ -43,6 +46,7 @@ function ScreenRecorder() {
     }
   };
 
+  // Function to stop recording and screen sharing
   const stopRecording = () => {
     if (mediaRecorder) {
       mediaRecorder.stop();
@@ -54,6 +58,7 @@ function ScreenRecorder() {
     }
   };
 
+  // Function to download the recorded video
   const downloadRecording = () => {
     if (recordedChunks.length === 0) {
       console.warn('No recorded data available for download.');
@@ -74,11 +79,13 @@ function ScreenRecorder() {
   return (
     <Container>
       <Grid container spacing={2} alignItems="center" justifyContent="center">
+        {/* Button to start a new capture */}
         <Grid item>
           <Button variant="contained" color="primary" onClick={startCapture}>
             New Capture
           </Button>
         </Grid>
+        {/* Render the "Start Recording" button when there's a screenStream and not recording */}
         {screenStream && !recording && (
           <Grid item>
             <Button
@@ -91,6 +98,7 @@ function ScreenRecorder() {
             </Button>
           </Grid>
         )}
+        {/* Render the "Stop Recording" button when mediaRecorder is available and recording */}
         {mediaRecorder && recording && (
           <Grid item>
             <Button
@@ -104,6 +112,7 @@ function ScreenRecorder() {
           </Grid>
         )}
       </Grid>
+      {/* Conditional rendering of the video preview based on recordedChunks */}
       {recordedChunks.length > 0 && (
         <video controls style={{ marginTop: '20px', width: '100%' }}>
           {recordedChunks.map((chunk, index) => (
@@ -111,6 +120,7 @@ function ScreenRecorder() {
           ))}
         </video>
       )}
+      {/* Button to download the recorded video */}
       <Button
         variant="outlined"
         color="primary"
